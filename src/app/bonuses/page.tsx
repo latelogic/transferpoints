@@ -1,6 +1,6 @@
-import programs from "../../data/programs.json";
-import partners from "../../data/partners.json";
-import bonuses from "../../data/bonuses.json";
+import programs from "../../../data/programs.json";
+import partners from "../../../data/partners.json";
+import bonuses from "../../../data/bonuses.json";
 
 const programMap = programs.reduce((acc, p) => ({ ...acc, [p.id]: p }), {} as Record<string, typeof programs[0]>);
 const partnerMap = partners.reduce((acc, p) => ({ ...acc, [p.id]: p }), {} as Record<string, typeof partners[0]>);
