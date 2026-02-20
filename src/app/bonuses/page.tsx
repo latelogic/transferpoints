@@ -1,3 +1,6 @@
+"use client";
+
+import { useState, useMemo } from "react";
 import programs from "../../../data/programs.json";
 import partners from "../../../data/partners.json";
 import bonuses from "../../../data/bonuses.json";
@@ -6,7 +9,29 @@ const programMap = programs.reduce((acc, p) => ({ ...acc, [p.id]: p }), {} as Re
 const partnerMap = partners.reduce((acc, p) => ({ ...acc, [p.id]: p }), {} as Record<string, typeof partners[0]>);
 
 export default function LiveBonusesPage() {
-  const allBonuses = bonuses.sort((a, b) => new Date(b.start_date).getTime() - new Date(a.start_date).getTime());
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedProgram, setSelectedProgram] = useState("all");
+  const [selectedPartner, setSelectedPartner] = useState("all");
+  const [selectedStatus, setSelectedStatus] = useState("all");
+
+  const filteredBonuses = useMemo(() => {
+    return bonuses
+      .filter((bonus) => {
+        const matchesSearch = 
+          searchQuery === "" ||
+          bonus.program_id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          bonus.partner_id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          programMap[bonus.program_id]?.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          partnerMap[bonus.partner_id]?.name.toLowerCase().includes(searchQuery.toLowerCase());
+
+        const matchesProgram = selectedProgram === "all" || bonus.program_id === selectedProgram;
+        const matchesPartner = selectedPartner === "all" || bonus.partner_id === selectedPartner;
+        const matchesStatus = selectedStatus === "all" || bonus.status === selectedStatus;
+
+        return matchesSearch && matchesProgram && matchesPartner && matchesStatus;
+      })
+      .sort((a, b) => new Date(b.start_date).getTime() - new Date(a.start_date).getTime());
+  }, [searchQuery, selectedProgram, selectedPartner, selectedStatus]);
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] text-[#0F172A]">
@@ -35,28 +60,95 @@ export default function LiveBonusesPage() {
             <p className="mt-2 text-[#64748B]">View all current, upcoming, and past transfer bonuses.</p>
         </div>
 
-        {/* Filter Bar Placeholder - Will need "use client" */}
-        <div className="mb-8 rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-sm">
-             <div className="flex flex-wrap gap-4">
-                <select className="rounded-lg border border-[#E2E8F0] px-3 py-2 text-sm text-[#475569]">
-                    <option>All Programs</option>
-                    {programs.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-                </select>
-                <select className="rounded-lg border border-[#E2E8F0] px-3 py-2 text-sm text-[#475569]">
-                    <option>All Partners</option>
-                     {partners.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-                </select>
-                <select className="rounded-lg border border-[#E2E8F0] px-3 py-2 text-sm text-[#475569]">
-                    <option>Any Status</option>
-                    <option value="live">Live</option>
-                    <option value="upcoming">Upcoming</option>
-                    <option value="expired">Expired</option>
-                </select>
+        <div className="mb-8 space-y-4 rounded-xl border border-[#E2E8F0] bg-white p-6 shadow-sm">
+             <div className="flex flex-col gap-4 md:flex-row">
+                <div className="flex-1">
+                  <label className="mb-1 block text-xs font-semibold uppercase text-[#64748B]">Search</label>
+                  <input 
+                    type="text" 
+                    placeholder="Search banks, airlines..." 
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-4 py-2.5 text-sm text-[#0F172A] focus:border-[#2563EB] focus:outline-none"
+                  />
+                </div>
+                <div>
+                   <label className="mb-1 block text-xs font-semibold uppercase text-[#64748B]">Program</label>
+                   <select 
+                      value={selectedProgram}
+                      onChange={(e) => setSelectedProgram(e.target.value)}
+                      className="w-full rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-4 py-2.5 text-sm text-[#0F172A] focus:border-[#2563EB] focus:outline-none"
+                   >
+                      <option value="all">All Programs</option>
+                      {programs.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+                   </select>
+                </div>
+                <div>
+                   <label className="mb-1 block text-xs font-semibold uppercase text-[#64748B]">Partner</label>
+                   <select 
+                      value={selectedPartner}
+                      onChange={(e) => setSelectedPartner(e.target.value)}
+                      className="w-full rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-4 py-2.5 text-sm text-[#0F172A] focus:border-[#2563EB] focus:outline-none"
+                   >
+                      <option value="all">All Partners</option>
+                       {partners.sort((a,b) => a.name.localeCompare(b.name)).map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+                   </select>
+                </div>
+                <div>
+                   <label className="mb-1 block text-xs font-semibold uppercase text-[#64748B]">Status</label>
+                   <select 
+                      value={selectedStatus}
+                      onChange={(e) => setSelectedStatus(e.target.value)}
+                      className="w-full rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-4 py-2.5 text-sm text-[#0F172A] focus:border-[#2563EB] focus:outline-none"
+                   >
+                      <option value="all">Any Status</option>
+                      <option value="live">Live</option>
+                      <option value="upcoming">Upcoming</option>
+                      <option value="expired">Expired</option>
+                   </select>
+                </div>
+             </div>
+             
+             <div className="flex items-center justify-between border-t border-[#E2E8F0] pt-4">
+                <span className="text-sm font-medium text-[#64748B]">Showing {filteredBonuses.length} results</span>
+                {(searchQuery || selectedProgram !== "all" || selectedPartner !== "all" || selectedStatus !== "all") && (
+                  <button 
+                    onClick={() => {
+                      setSearchQuery("");
+                      setSelectedProgram("all");
+                      setSelectedPartner("all");
+                      setSelectedStatus("all");
+                    }}
+                    className="text-sm font-semibold text-[#2563EB] hover:text-[#1D4ED8]"
+                  >
+                    Clear Filters
+                  </button>
+                )}
              </div>
         </div>
 
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-             {allBonuses.map((bonus) => (
+        {filteredBonuses.length === 0 ? (
+          <div className="flex flex-col items-center justify-center rounded-3xl border border-dashed border-[#E2E8F0] bg-white py-20 text-center">
+             <div className="rounded-full bg-[#F1F5F9] p-4">
+                <svg className="h-8 w-8 text-[#94A3B8]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+             </div>
+             <h3 className="mt-4 text-lg font-semibold text-[#0F172A]">No bonuses found</h3>
+             <p className="mt-2 text-[#64748B]">Try adjusting your search or filters to find what you're looking for.</p>
+             <button 
+                onClick={() => {
+                  setSearchQuery("");
+                  setSelectedProgram("all");
+                  setSelectedPartner("all");
+                  setSelectedStatus("all");
+                }}
+                className="mt-6 rounded-xl bg-[#EFF6FF] px-6 py-2.5 text-sm font-semibold text-[#2563EB] hover:bg-[#DBEAFE] transition"
+             >
+               Clear Filters
+             </button>
+          </div>
+        ) : (
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+             {filteredBonuses.map((bonus) => (
               <article key={bonus.id} className="rounded-3xl border border-[#E2E8F0] bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:border-[#2563EB] hover:shadow-lg relative overflow-hidden">
                 <div className="flex items-center justify-between mb-4">
                    <div className={`rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wide inline-flex items-center gap-1.5 ${
@@ -113,7 +205,8 @@ export default function LiveBonusesPage() {
                 </div>
               </article>
             ))}
-        </div>
+          </div>
+        )}
       </main>
     </div>
   );
