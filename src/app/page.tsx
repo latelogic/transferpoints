@@ -134,6 +134,75 @@ export default function Home() {
             ))}
           </div>
         </section>
+
+        <section className="mt-12" id="programs">
+          <div className="flex items-end justify-between mb-6">
+            <div>
+              <p className="text-sm font-semibold uppercase tracking-widest text-[#94A3B8]">Programs</p>
+              <h2 className="text-3xl font-bold text-[#0F172A]">Credit Card Points</h2>
+            </div>
+          </div>
+          <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
+            {programs.map((program) => (
+              <div key={program.id} className="min-w-[280px] flex-shrink-0 rounded-2xl border border-[#E2E8F0] bg-white p-5 shadow-sm hover:border-[#2563EB] transition cursor-pointer">
+                <div className="flex items-center gap-4">
+                  <img src={program.logo_url} alt={program.name} className="h-10 w-10 rounded-full object-contain bg-white border border-gray-100" />
+                  <div>
+                    <h3 className="font-bold text-[#0F172A] text-sm">{program.name}</h3>
+                    <p className="text-xs text-[#64748B]">{program.bank}</p>
+                  </div>
+                </div>
+                <div className="mt-4 flex items-center justify-between">
+                  <span className="text-xs font-medium text-[#64748B]">{program.key_cards.length} Cards</span>
+                  {bonuses.filter(b => b.program_id === program.id && b.status === "live").length > 0 && (
+                     <span className="rounded-full bg-[#EFF6FF] px-2 py-1 text-xs font-semibold text-[#1D4ED8]">
+                       {bonuses.filter(b => b.program_id === program.id && b.status === "live").length} Active Bonuses
+                     </span>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="mt-12" id="partners">
+           <div className="flex items-end justify-between mb-6">
+            <div>
+              <p className="text-sm font-semibold uppercase tracking-widest text-[#94A3B8]">Partners</p>
+              <h2 className="text-3xl font-bold text-[#0F172A]">Airlines & Hotels</h2>
+            </div>
+          </div>
+          <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
+            {partners.map((partner) => (
+              <div key={partner.id} className="min-w-[240px] flex-shrink-0 rounded-2xl border border-[#E2E8F0] bg-white p-5 shadow-sm hover:border-[#2563EB] transition cursor-pointer">
+                 <div className="flex items-center gap-4">
+                  <img src={partner.logo_url} alt={partner.name} className="h-10 w-10 rounded-full object-contain bg-white border border-gray-100" />
+                  <div>
+                    <h3 className="font-bold text-[#0F172A] text-sm truncate max-w-[140px]">{partner.name}</h3>
+                    <p className="text-xs text-[#64748B]">{partner.alliance === "independent" ? "Independent" : partner.alliance}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+         <section className="mt-12 mb-12">
+            <h2 className="text-2xl font-bold text-[#0F172A] mb-6">Recent Activity</h2>
+             <div className="space-y-4">
+              {bonuses.slice(0, 5).map((bonus, i) => (
+                <div key={i} className="flex items-center gap-4 rounded-xl border border-[#E2E8F0] bg-white p-4">
+                    <div className="h-2 w-2 rounded-full bg-[#2563EB]"></div>
+                    <div className="flex-1">
+                        <p className="text-sm font-medium text-[#0F172A]">
+                            <span className="font-bold">{bonus.program_id}</span> added a <span className="font-bold text-[#F59E0B]">{bonus.bonus_pct}% transfer bonus</span> to {bonus.partner_id}
+                        </p>
+                        <p className="text-xs text-[#64748B]">Updated {bonus.start_date}</p>
+                    </div>
+                </div>
+              ))}
+             </div>
+        </section>
       </main>
     </div>
   );
